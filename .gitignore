@@ -6,3 +6,7 @@ coverage.out
 .idea
 .codex
 .qoder
+.vscode
+.venv
+__pycache__
+.git
