@@ -13,6 +13,7 @@ Tervux CLI for generating grounded, branded, and developer-friendly `README.md` 
 </p>
 
 <div align="center" data-tervdocs-divider="true"><img src="./.tervdocs/readme-divider.svg" alt="section divider" /></div>
+
 ## **Overview**
 
 `tervdocs` is a Go CLI that scans a repository, extracts implementation signals, summarizes architecture context, builds provider prompts, and writes a polished `README.md` with Tervux-styled output. It is designed for projects that want better onboarding docs without manually rewriting repository knowledge every time the code changes.
@@ -20,6 +21,7 @@ Tervux CLI for generating grounded, branded, and developer-friendly `README.md` 
 The project combines deterministic scanning and AI-assisted generation. It also includes a local structured fallback path for unreliable free-provider runs, backup-safe output writing, provider health guidance, and a branded terminal experience built with responsive tables and a custom Tervux banner.
 
 <div align="center" data-tervdocs-divider="true"><img src="./.tervdocs/readme-divider.svg" alt="section divider" /></div>
+
 ## **Aim**
 
 - Generate README files that stay close to the actual codebase.
@@ -28,6 +30,7 @@ The project combines deterministic scanning and AI-assisted generation. It also 
 - Provide a premium CLI UX under the Tervux brand rather than plain terminal output.
 
 <div align="center" data-tervdocs-divider="true"><img src="./.tervdocs/readme-divider.svg" alt="section divider" /></div>
+
 ## **Problem Statement**
 
 Most README generators fail in one of two ways:
@@ -38,6 +41,7 @@ Most README generators fail in one of two ways:
 For a documentation tool, that creates a trust problem. The README becomes the least reliable artifact in the repository even though it should be the fastest place to understand the project.
 
 <div align="center" data-tervdocs-divider="true"><img src="./.tervdocs/readme-divider.svg" alt="section divider" /></div>
+
 ## **Solution**
 
 `tervdocs` solves that by splitting README generation into clear stages:
@@ -52,6 +56,7 @@ For a documentation tool, that creates a trust problem. The README becomes the l
 When the shared free provider is weak or unavailable, the tool can still fall back to a local structured renderer so generation does not fully fail.
 
 <div align="center" data-tervdocs-divider="true"><img src="./.tervdocs/readme-divider.svg" alt="section divider" /></div>
+
 ## **Feature Highlights**
 
 - Cobra-based CLI with `init`, `generate`, `preview`, `doctor`, `providers`, `auth`, `config`, `template`, and `version`.
@@ -65,6 +70,7 @@ When the shared free provider is weak or unavailable, the tool can still fall ba
 - Tervux-branded help menus and responsive terminal tables for a polished CLI experience.
 
 <div align="center" data-tervdocs-divider="true"><img src="./.tervdocs/readme-divider.svg" alt="section divider" /></div>
+
 ## **Tech Stack**
 
 | Layer | Tools |
@@ -79,11 +85,12 @@ When the shared free provider is weak or unavailable, the tool can still fall ba
 | Testing | `go test ./...` |
 
 <div align="center" data-tervdocs-divider="true"><img src="./.tervdocs/readme-divider.svg" alt="section divider" /></div>
+
 ## **Installation**
 
 ```bash
-git clone <your-repo-url>
-cd "Tervux Docs"
+git clone https://github.com/JonniTech/TervDocs.git
+cd TervDocs
 go mod tidy
 go test ./...
 ```
@@ -97,6 +104,7 @@ go run . providers list
 ```
 
 <div align="center" data-tervdocs-divider="true"><img src="./.tervdocs/readme-divider.svg" alt="section divider" /></div>
+
 ## **Quick Start**
 
 ```bash
@@ -114,6 +122,7 @@ Recommended first-run path:
 4. Generate the final `README.md` with backup enabled.
 
 <div align="center" data-tervdocs-divider="true"><img src="./.tervdocs/readme-divider.svg" alt="section divider" /></div>
+
 ## **Default Profile**
 
 The project ships with these code-level defaults in `internal/config/config.go`:
@@ -139,7 +148,9 @@ Default scan excludes include common noise sources such as `.git`, `node_modules
 Any local `.tervdocs.toml` file can override these defaults for a specific repository.
 
 <div align="center" data-tervdocs-divider="true"><img src="./.tervdocs/readme-divider.svg" alt="section divider" /></div>
-## **Command Reference**
+
+
+## ****Command Reference****
 
 | Command | Purpose |
 | --- | --- |
@@ -157,6 +168,7 @@ Any local `.tervdocs.toml` file can override these defaults for a specific repos
 | `tervdocs version` | Show CLI version and brand metadata |
 
 <div align="center" data-tervdocs-divider="true"><img src="./.tervdocs/readme-divider.svg" alt="section divider" /></div>
+
 ## **Generation Flow**
 
 ```mermaid
@@ -178,6 +190,7 @@ flowchart TD
 ```
 
 <div align="center" data-tervdocs-divider="true"><img src="./.tervdocs/readme-divider.svg" alt="section divider" /></div>
+
 ## **Architecture Notes**
 
 - `main.go` starts the CLI and delegates all execution to `cmd.Execute()`.
@@ -192,6 +205,7 @@ flowchart TD
 - `internal/cli` owns the Tervux-branded terminal UX.
 
 <div align="center" data-tervdocs-divider="true"><img src="./.tervdocs/readme-divider.svg" alt="section divider" /></div>
+
 ## **Project Structure**
 
 ```text
@@ -229,6 +243,7 @@ flowchart TD
 ```
 
 <div align="center" data-tervdocs-divider="true"><img src="./.tervdocs/readme-divider.svg" alt="section divider" /></div>
+
 ## **Provider Strategy**
 
 Out of the box, `tervdocs` supports four provider modes:
@@ -254,6 +269,7 @@ Expected environment variables:
 - `ZAI_API_KEY` for the free-provider endpoint
 
 <div align="center" data-tervdocs-divider="true"><img src="./.tervdocs/readme-divider.svg" alt="section divider" /></div>
+
 ## **Development Workflow**
 
 ```bash
@@ -275,6 +291,7 @@ COLUMNS=120 go run . --help
 ```
 
 <div align="center" data-tervdocs-divider="true"><img src="./.tervdocs/readme-divider.svg" alt="section divider" /></div>
+
 ## **Troubleshooting**
 
 - If `tervdocs generate` says the config is missing, run `tervdocs init` first.
@@ -284,9 +301,11 @@ COLUMNS=120 go run . --help
 - If a README already exists, backup mode can preserve the older version before overwrite.
 
 <div align="center" data-tervdocs-divider="true"><img src="./.tervdocs/readme-divider.svg" alt="section divider" /></div>
+
 ## **License**
 
 This project is released under the MIT License. See [`LICENSE`](./LICENSE) for details.
 
 <div align="center" data-tervdocs-divider="true"><img src="./.tervdocs/readme-divider.svg" alt="section divider" /></div>
+
 <div align="center"><sub style="color:#00ADD8;">Programmed by NYAGANYA</sub></div>

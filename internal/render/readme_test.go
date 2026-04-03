@@ -47,6 +47,9 @@ func TestEnhanceAddsSectionsAndFooter(t *testing.T) {
 	if !strings.Contains(got, DividerAssetRelativePath()) {
 		t.Fatalf("expected GitHub-safe divider asset path")
 	}
+	if !strings.Contains(got, "</div>\n\n## **Aim**") {
+		t.Fatalf("expected spacing between divider and heading")
+	}
 }
 
 func TestEnhanceUsesBrandedProjectTitleForTervDocs(t *testing.T) {

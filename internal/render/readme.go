@@ -18,7 +18,7 @@ func Enhance(content string, repo scan.RepoSummary, ctx summarize.Context, cfg c
 	content = ensureTitle(content, repo.ProjectName)
 	content = ensureBadgeRow(content, repo)
 	content = ensureSections(content, repo, ctx)
-	content = normalizeBoldHeadings(content)
+	content = normalizeHeadingStyle(content)
 	content = injectSectionDividers(content, ctx.BrandColor)
 	content = ensureFooter(content, cfg.DeveloperName, ctx.BrandColor)
 	return strings.TrimSpace(content) + "\n"
@@ -95,7 +95,7 @@ func injectSectionDividers(content, color string) string {
 	out := make([]string, 0, len(lines)+16)
 	for i, line := range lines {
 		if strings.HasPrefix(line, "## ") && i > 0 {
-			out = append(out, sectionDivider(color))
+			out = append(out, sectionDivider(color), "")
 		}
 		out = append(out, line)
 	}
@@ -360,7 +360,7 @@ func trimStringSlice(in []string, max int) []string {
 	return in[:max]
 }
 
-func normalizeBoldHeadings(content string) string {
+func normalizeHeadingStyle(content string) string {
 	lines := strings.Split(content, "\n")
 	for i, line := range lines {
 		trimmed := strings.TrimSpace(line)
