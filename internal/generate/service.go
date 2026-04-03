@@ -117,6 +117,11 @@ func (s *Service) Run(ctx context.Context, cfg config.Config, opts Options) (Res
 	}
 
 	outPath := config.OutputAbsPath(opts.RootDir, cfg.Output.File)
+	if !(opts.DryRun || opts.Preview) {
+		if err := render.EnsureDividerAsset(outPath, contextDoc.BrandColor); err != nil {
+			return Result{}, err
+		}
+	}
 	writeRes, err := output.Write(outPath, resp.Content, cfg.Output.Backup, opts.DryRun || opts.Preview)
 	if err != nil {
 		return Result{}, err

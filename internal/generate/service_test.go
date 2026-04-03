@@ -66,8 +66,11 @@ func TestRunWithProviderFactory(t *testing.T) {
 	if !strings.Contains(rendered, "Programmed by Someone") {
 		t.Fatalf("expected developer footer to be injected")
 	}
-	if !strings.Contains(rendered, "data-tervdocs-divider") {
-		t.Fatalf("expected section dividers to be injected")
+	if !strings.Contains(rendered, ".tervdocs/readme-divider.svg") {
+		t.Fatalf("expected GitHub-safe divider asset path")
+	}
+	if _, err := os.Stat(filepath.Join(root, ".tervdocs", "readme-divider.svg")); err != nil {
+		t.Fatalf("expected divider asset to be written: %v", err)
 	}
 }
 
@@ -105,7 +108,7 @@ func TestRunFallsBackWhenFreeProviderIsRateLimited(t *testing.T) {
 	if err != nil {
 		t.Fatalf("expected fallback README to be written: %v", err)
 	}
-	if !strings.Contains(string(body), "## Flow Diagram") {
+	if !strings.Contains(string(body), "## **Flow Diagram**") {
 		t.Fatalf("expected structured fallback content")
 	}
 }

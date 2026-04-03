@@ -18,6 +18,7 @@ func Enhance(content string, repo scan.RepoSummary, ctx summarize.Context, cfg c
 	content = ensureTitle(content, repo.ProjectName)
 	content = ensureBadgeRow(content, repo)
 	content = ensureSections(content, repo, ctx)
+	content = normalizeBoldHeadings(content)
 	content = injectSectionDividers(content, ctx.BrandColor)
 	content = ensureFooter(content, cfg.DeveloperName, ctx.BrandColor)
 	return strings.TrimSpace(content) + "\n"
@@ -30,7 +31,7 @@ func ensureTitle(content, projectName string) string {
 	if projectName == "" {
 		projectName = "Project"
 	}
-	return "# " + projectName + "\n\n" + strings.TrimSpace(content)
+	return "# " + displayProjectTitle(projectName) + "\n\n" + strings.TrimSpace(content)
 }
 
 func ensureBadgeRow(content string, repo scan.RepoSummary) string {
@@ -258,11 +259,11 @@ func projectStructureSection(repo scan.RepoSummary) string {
 }
 
 func sectionDivider(color string) string {
-	return fmt.Sprintf(`<div align="center" data-tervdocs-divider="true"><svg width="100%%" height="6" viewBox="0 0 120 6" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="section divider"><rect x="0" y="2.5" width="120" height="1" fill="%s" opacity="0.35"></rect><rect x="-24" y="2" width="24" height="2" rx="1" fill="%s"><animate attributeName="x" from="-24" to="144" dur="4s" repeatCount="indefinite"></animate></rect></svg></div>`, color, color)
+	return fmt.Sprintf(`<div align="center" data-tervdocs-divider="true"><img src="%s" alt="section divider" /></div>`, DividerAssetRelativePath())
 }
 
 func hasSection(content, name string) bool {
-	re := regexp.MustCompile(`(?mi)^##\s+` + regexp.QuoteMeta(name) + `\s*$`)
+	re := regexp.MustCompile(`(?mi)^##\s+(?:\*\*)?` + regexp.QuoteMeta(name) + `(?:\*\*)?\s*$`)
 	return re.MatchString(content)
 }
 
@@ -357,4 +358,48 @@ func trimStringSlice(in []string, max int) []string {
 		return in
 	}
 	return in[:max]
+}
+
+func normalizeBoldHeadings(content string) string {
+	lines := strings.Split(content, "\n")
+	for i, line := range lines {
+		trimmed := strings.TrimSpace(line)
+		if strings.HasPrefix(trimmed, "# ") {
+			title := strings.TrimSpace(strings.TrimPrefix(trimmed, "# "))
+			lines[i] = "# " + ensureBoldHeadingText(displayProjectTitle(stripMarkdownBold(title)))
+			continue
+		}
+		if strings.HasPrefix(trimmed, "## ") {
+			title := strings.TrimSpace(strings.TrimPrefix(trimmed, "## "))
+			lines[i] = "## " + ensureBoldHeadingText(stripMarkdownBold(title))
+		}
+	}
+	return strings.Join(lines, "\n")
+}
+
+func ensureBoldHeadingText(text string) string {
+	text = strings.TrimSpace(text)
+	if strings.HasPrefix(text, "**") && strings.HasSuffix(text, "**") {
+		return text
+	}
+	return "**" + text + "**"
+}
+
+func stripMarkdownBold(text string) string {
+	text = strings.TrimSpace(text)
+	if strings.HasPrefix(text, "**") && strings.HasSuffix(text, "**") && len(text) >= 4 {
+		return strings.TrimSuffix(strings.TrimPrefix(text, "**"), "**")
+	}
+	return text
+}
+
+func displayProjectTitle(projectName string) string {
+	switch strings.ToLower(strings.TrimSpace(projectName)) {
+	case "tervdocs":
+		return "TervDocs"
+	case "":
+		return "Project"
+	default:
+		return projectName
+	}
 }
