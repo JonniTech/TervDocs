@@ -31,6 +31,24 @@ var (
 	ErrEmptyResponse = errors.New("provider returned empty response")
 )
 
+type StatusError struct {
+	Provider   string
+	StatusCode int
+	Body       string
+}
+
+func (e StatusError) Error() string {
+	if e.Body == "" {
+		return fmt.Sprintf("status %d from %s provider", e.StatusCode, e.Provider)
+	}
+	return fmt.Sprintf("status %d from %s provider: %s", e.StatusCode, e.Provider, e.Body)
+}
+
+func IsRateLimited(err error) bool {
+	var statusErr StatusError
+	return errors.As(err, &statusErr) && statusErr.StatusCode == 429
+}
+
 func EnsureNonEmpty(r Response) error {
 	if r.Content == "" {
 		return ErrEmptyResponse

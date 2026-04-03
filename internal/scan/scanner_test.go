@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"tervdocs/internal/config"
@@ -12,7 +13,9 @@ import (
 func TestScanDetectsSignals(t *testing.T) {
 	root := t.TempDir()
 	mustWrite(t, filepath.Join(root, "go.mod"), "module github.com/acme/demo\n")
-	mustWrite(t, filepath.Join(root, "main.go"), "package main\nfunc main(){}\n")
+	mustWrite(t, filepath.Join(root, "main.go"), "// Demo CLI generates docs\npackage main\nfunc main(){}\n")
+	mustWrite(t, filepath.Join(root, "README.md"), "# Old readme\n")
+	mustWrite(t, filepath.Join(root, "README.md.bak.1"), "# backup\n")
 	mustWrite(t, filepath.Join(root, "Dockerfile"), "FROM golang:1.26\n")
 	mustWrite(t, filepath.Join(root, ".github/workflows/ci.yml"), "name: ci\n")
 	mustWrite(t, filepath.Join(root, ".env.example"), "PORT=8080\n")
@@ -30,6 +33,17 @@ func TestScanDetectsSignals(t *testing.T) {
 	}
 	if len(sum.CIConfigs) == 0 {
 		t.Fatalf("expected ci configs")
+	}
+	if !sum.ReadmeExists {
+		t.Fatalf("expected README existence to be detected")
+	}
+	for _, file := range sum.ImportantFiles {
+		if strings.Contains(strings.ToLower(file.Path), "readme") {
+			t.Fatalf("readme artifacts should not be used as key context files: %s", file.Path)
+		}
+	}
+	if len(sum.PurposeHints) == 0 {
+		t.Fatalf("expected purpose hints from code comments")
 	}
 }
 

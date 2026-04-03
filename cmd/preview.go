@@ -8,6 +8,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"tervdocs/internal/cli"
 	"tervdocs/internal/config"
 	"tervdocs/internal/generate"
 )
@@ -29,6 +30,8 @@ func newPreviewCmd() *cobra.Command {
 				}
 				return err
 			}
+			selectedProvider := valueOr(cfg.Provider, provider)
+			printProviderAdvisory(cmd, selectedProvider)
 			ctx, cancel := context.WithTimeout(context.Background(), time.Duration(cfg.TimeoutSec)*time.Second)
 			defer cancel()
 			res, err := container.Generator.Run(ctx, cfg, generate.Options{
@@ -40,6 +43,20 @@ func newPreviewCmd() *cobra.Command {
 			})
 			if err != nil {
 				return err
+			}
+			cli.PrintTable(cmd.OutOrStdout(), "Preview Summary", []string{"Field", "Value"}, [][]string{
+				{"Provider", res.Provider},
+				{"Model", res.Model},
+				{"Template", valueOr(cfg.Template, template)},
+				{"Files", fmt.Sprintf("%d", res.Scan.FilesScanned)},
+				{"Language", emptyValue(res.Scan.PrimaryLanguage)},
+			})
+			if len(res.Warnings) > 0 {
+				rows := [][]string{}
+				for _, warning := range res.Warnings {
+					rows = append(rows, []string{"WARN", warning})
+				}
+				cli.PrintTable(cmd.OutOrStdout(), "Preview Warnings", []string{"State", "Detail"}, rows)
 			}
 			fmt.Fprintln(cmd.OutOrStdout(), res.Markdown)
 			return nil

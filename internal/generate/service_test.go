@@ -2,8 +2,10 @@ package generate
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"tervdocs/internal/config"
@@ -11,6 +13,7 @@ import (
 )
 
 type fakeProvider struct{}
+type failingProvider struct{}
 
 func (f fakeProvider) Name() string    { return "fake" }
 func (f fakeProvider) Validate() error { return nil }
@@ -20,6 +23,12 @@ func (f fakeProvider) Generate(_ context.Context, _ providers.Request) (provider
 		Provider: "fake",
 		Model:    "fake-model",
 	}, nil
+}
+
+func (f failingProvider) Name() string    { return "free" }
+func (f failingProvider) Validate() error { return nil }
+func (f failingProvider) Generate(_ context.Context, _ providers.Request) (providers.Response, error) {
+	return providers.Response{}, providers.StatusError{Provider: "free", StatusCode: 429, Body: "rate limit"}
 }
 
 func TestRunWithProviderFactory(t *testing.T) {
@@ -34,6 +43,7 @@ func TestRunWithProviderFactory(t *testing.T) {
 	cfg := config.Default()
 	cfg.Provider = "free"
 	cfg.Output.File = "README.test.md"
+	cfg.DeveloperName = "Someone"
 
 	svc := NewServiceWithProviderFactory(func(name string, cfg config.Config) (providers.Provider, error) {
 		return fakeProvider{}, nil
@@ -49,7 +59,53 @@ func TestRunWithProviderFactory(t *testing.T) {
 	if err != nil {
 		t.Fatalf("read output failed: %v", err)
 	}
-	if string(b) == "" || b[0] != '#' {
+	rendered := string(b)
+	if rendered == "" || b[0] != '#' {
 		t.Fatalf("unexpected output content")
+	}
+	if !strings.Contains(rendered, "Programmed by Someone") {
+		t.Fatalf("expected developer footer to be injected")
+	}
+	if !strings.Contains(rendered, "data-tervdocs-divider") {
+		t.Fatalf("expected section dividers to be injected")
+	}
+}
+
+func TestRunFallsBackWhenFreeProviderIsRateLimited(t *testing.T) {
+	root := t.TempDir()
+	if err := os.WriteFile(filepath.Join(root, "go.mod"), []byte("module demo\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, "main.go"), []byte("package main\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	cfg := config.Default()
+	cfg.Provider = "free"
+	cfg.Output.File = "README.fallback.md"
+	cfg.DeveloperName = "Someone"
+
+	svc := NewServiceWithProviderFactory(func(name string, cfg config.Config) (providers.Provider, error) {
+		if name != "free" {
+			return nil, fmt.Errorf("unexpected provider: %s", name)
+		}
+		return failingProvider{}, nil
+	})
+	res, err := svc.Run(context.Background(), cfg, Options{RootDir: root})
+	if err != nil {
+		t.Fatalf("expected fallback success, got error: %v", err)
+	}
+	if res.Provider != "free-local-fallback" {
+		t.Fatalf("expected local fallback provider, got %s", res.Provider)
+	}
+	if len(res.Warnings) == 0 {
+		t.Fatalf("expected fallback warning")
+	}
+	body, err := os.ReadFile(filepath.Join(root, "README.fallback.md"))
+	if err != nil {
+		t.Fatalf("expected fallback README to be written: %v", err)
+	}
+	if !strings.Contains(string(body), "## Flow Diagram") {
+		t.Fatalf("expected structured fallback content")
 	}
 }

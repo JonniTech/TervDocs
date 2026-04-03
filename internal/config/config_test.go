@@ -12,6 +12,7 @@ func TestSaveLoadRoundTrip(t *testing.T) {
 	cfg := Default()
 	cfg.Provider = "free"
 	cfg.Template = "tervux"
+	cfg.DeveloperName = "Tervux Dev"
 	cfg.Scan.MaxFiles = 123
 
 	if err := Save(path, cfg); err != nil {
@@ -26,6 +27,9 @@ func TestSaveLoadRoundTrip(t *testing.T) {
 	}
 	if loaded.Scan.MaxFiles != 123 {
 		t.Fatalf("expected max files 123, got %d", loaded.Scan.MaxFiles)
+	}
+	if loaded.DeveloperName != "Tervux Dev" {
+		t.Fatalf("expected developer name to round-trip")
 	}
 }
 

@@ -28,16 +28,7 @@ func newDoctorCmd() *cobra.Command {
 			ctx, cancel := context.WithTimeout(context.Background(), time.Duration(cfg.TimeoutSec)*time.Second)
 			defer cancel()
 			rep := doctor.Run(ctx, cfg, rootDir)
-
-			for _, c := range rep.Checks {
-				fmt.Fprintln(cmd.OutOrStdout(), cli.Success("%s", c))
-			}
-			for _, w := range rep.Warnings {
-				fmt.Fprintln(cmd.OutOrStdout(), cli.Warn("%s", w))
-			}
-			for _, e := range rep.Errors {
-				fmt.Fprintln(cmd.OutOrStdout(), cli.Error("%s", e))
-			}
+			cli.PrintTable(cmd.OutOrStdout(), "Doctor Report", []string{"State", "Detail"}, cli.StatusTableRows(rep.Checks, rep.Warnings, rep.Errors))
 			if len(rep.Errors) > 0 {
 				return fmt.Errorf("doctor found %d issue(s)", len(rep.Errors))
 			}

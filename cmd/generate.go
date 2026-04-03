@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -33,10 +34,11 @@ func newGenerateCmd() *cobra.Command {
 				}
 				return err
 			}
+			selectedProvider := valueOr(cfg.Provider, provider)
+			printProviderAdvisory(cmd, selectedProvider)
 
 			spin := cli.NewSpinner("Scanning and generating README")
 			spin.Start()
-			defer spin.Stop()
 
 			ctx, cancel := context.WithTimeout(context.Background(), time.Duration(cfg.TimeoutSec)*time.Second)
 			defer cancel()
@@ -48,17 +50,30 @@ func newGenerateCmd() *cobra.Command {
 				Template: template,
 				Output:   output,
 			})
+			spin.Stop()
 			if err != nil {
 				return err
 			}
-			fmt.Fprintln(cmd.OutOrStdout(), cli.Success("README generated at %s", res.OutputPath))
+			rows := [][]string{
+				{"OK", "README generated successfully"},
+				{"Output", res.OutputPath},
+				{"Provider", res.Provider},
+				{"Model", res.Model},
+				{"Template", valueOr(cfg.Template, template)},
+				{"Files", fmt.Sprintf("%d", res.Scan.FilesScanned)},
+				{"Language", emptyValue(res.Scan.PrimaryLanguage)},
+				{"Frameworks", joinOrNone(res.Scan.Frameworks)},
+			}
 			if res.BackupPath != "" {
-				fmt.Fprintln(cmd.OutOrStdout(), cli.Info("Backup created at %s", res.BackupPath))
+				rows = append(rows, []string{"Backup", res.BackupPath})
 			}
 			if dryRun {
-				fmt.Fprintln(cmd.OutOrStdout(), cli.Warn("Dry-run enabled, file not written"))
+				rows = append(rows, []string{"WARN", "Dry-run enabled, file not written"})
 			}
-			fmt.Fprintln(cmd.OutOrStdout(), cli.Info("Scanned files: %d", res.Scan.FilesScanned))
+			for _, warning := range res.Warnings {
+				rows = append(rows, []string{"WARN", warning})
+			}
+			cli.PrintTable(cmd.OutOrStdout(), "Generation Summary", []string{"Field", "Value"}, rows)
 			return nil
 		},
 	}
@@ -68,4 +83,25 @@ func newGenerateCmd() *cobra.Command {
 	cmd.Flags().StringVar(&template, "template", "", "Override template for this run")
 	cmd.Flags().StringVar(&output, "output", "", "Override output file path")
 	return cmd
+}
+
+func joinOrNone(items []string) string {
+	if len(items) == 0 {
+		return "none detected"
+	}
+	return strings.Join(items, ", ")
+}
+
+func emptyValue(v string) string {
+	if strings.TrimSpace(v) == "" {
+		return "unknown"
+	}
+	return v
+}
+
+func valueOr(current, override string) string {
+	if strings.TrimSpace(override) != "" {
+		return override
+	}
+	return current
 }

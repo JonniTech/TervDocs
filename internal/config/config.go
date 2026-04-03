@@ -40,25 +40,27 @@ type ProviderGroup struct {
 }
 
 type Config struct {
-	Provider    string        `mapstructure:"provider" toml:"provider"`
-	Model       string        `mapstructure:"model" toml:"model"`
-	Template    string        `mapstructure:"template" toml:"template"`
-	Temperature float64       `mapstructure:"temperature" toml:"temperature"`
-	TimeoutSec  int           `mapstructure:"timeout" toml:"timeout"`
-	Output      OutputConfig  `mapstructure:"output" toml:"output"`
-	Scan        ScanConfig    `mapstructure:"scan" toml:"scan"`
-	Providers   ProviderGroup `mapstructure:"providers" toml:"providers"`
+	Provider      string        `mapstructure:"provider" toml:"provider"`
+	Model         string        `mapstructure:"model" toml:"model"`
+	Template      string        `mapstructure:"template" toml:"template"`
+	DeveloperName string        `mapstructure:"developer_name" toml:"developer_name"`
+	Temperature   float64       `mapstructure:"temperature" toml:"temperature"`
+	TimeoutSec    int           `mapstructure:"timeout" toml:"timeout"`
+	Output        OutputConfig  `mapstructure:"output" toml:"output"`
+	Scan          ScanConfig    `mapstructure:"scan" toml:"scan"`
+	Providers     ProviderGroup `mapstructure:"providers" toml:"providers"`
 }
 
 var ErrConfigNotFound = errors.New("config file not found")
 
 func Default() Config {
 	return Config{
-		Provider:    "free",
-		Model:       "glm-4.7-flash",
-		Template:    "default",
-		Temperature: 0.2,
-		TimeoutSec:  60,
+		Provider:      "free",
+		Model:         "glm-4.7-flash",
+		Template:      "default",
+		DeveloperName: "",
+		Temperature:   0.2,
+		TimeoutSec:    60,
 		Output: OutputConfig{
 			File:   "README.md",
 			Backup: true,
@@ -66,7 +68,7 @@ func Default() Config {
 		Scan: ScanConfig{
 			Include: []string{},
 			Exclude: []string{
-				".git", "node_modules", "dist", "build", "vendor", "coverage", ".next", ".turbo", "bin",
+				".git", "node_modules", "dist", "build", "vendor", "coverage", ".next", ".turbo", "bin", ".venv", ".idea", ".vscode", ".qoder", ".codex",
 			},
 			MaxFiles:        200,
 			MaxBytesPerFile: 50_000,
@@ -236,6 +238,8 @@ func setField(cfg *Config, key, value string) error {
 		cfg.Model = value
 	case "template":
 		cfg.Template = value
+	case "developer_name":
+		cfg.DeveloperName = value
 	case "output.file":
 		cfg.Output.File = value
 	case "output.backup":

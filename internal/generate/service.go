@@ -9,6 +9,7 @@ import (
 	"tervdocs/internal/output"
 	"tervdocs/internal/prompt"
 	"tervdocs/internal/providers"
+	"tervdocs/internal/render"
 	"tervdocs/internal/scan"
 	"tervdocs/internal/summarize"
 	"tervdocs/internal/templates"
@@ -29,6 +30,9 @@ type Result struct {
 	OutputPath string
 	BackupPath string
 	Scan       scan.RepoSummary
+	Provider   string
+	Model      string
+	Warnings   []string
 }
 
 type ProviderFactory func(name string, cfg config.Config) (providers.Provider, error)
@@ -72,7 +76,7 @@ func (s *Service) Run(ctx context.Context, cfg config.Config, opts Options) (Res
 	if err != nil {
 		return Result{}, err
 	}
-	contextDoc := summarize.Build(repo)
+	contextDoc := summarize.Build(repo, cfg.DeveloperName)
 	template, err := templates.Get(cfg.Template)
 	if err != nil {
 		return Result{}, err
@@ -91,10 +95,25 @@ func (s *Service) Run(ctx context.Context, cfg config.Config, opts Options) (Res
 		UserPrompt:   userPrompt,
 		Model:        cfg.Model,
 		Temperature:  cfg.Temperature,
-		MaxTokens:    2000,
+		MaxTokens:    4500,
 	})
 	if err != nil {
-		return Result{}, fmt.Errorf("generation failed: %w", err)
+		if cfg.Provider == "free" {
+			resp = providers.Response{
+				Content:  render.FallbackMarkdown(repo, contextDoc, cfg),
+				Provider: "free-local-fallback",
+				Model:    "local-structured-fallback",
+			}
+		} else {
+			return Result{}, fmt.Errorf("generation failed: %w", err)
+		}
+	}
+	warnings := []string{}
+	if err != nil && cfg.Provider == "free" {
+		warnings = append(warnings, freeFallbackWarning(err))
+	}
+	if resp.Provider != "free-local-fallback" {
+		resp.Content = render.Enhance(resp.Content, repo, contextDoc, cfg)
 	}
 
 	outPath := config.OutputAbsPath(opts.RootDir, cfg.Output.File)
@@ -108,5 +127,17 @@ func (s *Service) Run(ctx context.Context, cfg config.Config, opts Options) (Res
 		OutputPath: filepath.Clean(writeRes.Path),
 		BackupPath: writeRes.BackupPath,
 		Scan:       repo,
+		Provider:   resp.Provider,
+		Model:      resp.Model,
+		Warnings:   warnings,
 	}, nil
+}
+
+func freeFallbackWarning(err error) string {
+	switch {
+	case providers.IsRateLimited(err):
+		return "The shared free provider is currently rate-limited, so tervdocs used the local structured fallback generator for this run."
+	default:
+		return "The free provider was unavailable, so tervdocs used the local structured fallback generator for this run."
+	}
 }

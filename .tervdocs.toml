@@ -1,6 +1,7 @@
-provider = 'free'
+provider = 'openai'
 model = 'glm-4.7-flash'
-template = 'default'
+template = 'detailed'
+developer_name = 'NYAGANYA'
 temperature = 0.2
 timeout = 60
 
@@ -28,7 +29,7 @@ base_url = 'https://api.openai.com/v1'
 endpoint = ''
 
 [providers.gemini]
-api_key = ''
+api_key = 'AIzaSyD_BeL9o3KBYcP84uMj52Zke6wjkYnItSA'
 model = 'gemini-2.5-flash'
 base_url = 'https://generativelanguage.googleapis.com/v1beta'
 endpoint = ''

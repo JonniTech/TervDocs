@@ -1,6 +1,7 @@
 provider = "free"
 model = "glm-4.7-flash"
 template = "tervux"
+developer_name = "Someone"
 temperature = 0.2
 timeout = 60
 
@@ -10,7 +11,7 @@ backup = true
 
 [scan]
 include = ["cmd", "internal", "pkg", "src", "app"]
-exclude = ["node_modules", ".git", "dist", "build", "vendor", "coverage", ".next", ".turbo", "bin"]
+exclude = ["node_modules", ".git", "dist", "build", "vendor", "coverage", ".next", ".turbo", "bin", ".idea", ".vscode", ".qoder", ".codex"]
 max_files = 200
 max_bytes_per_file = 50000
 

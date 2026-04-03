@@ -18,39 +18,39 @@ var builtIn = map[string]Template{
 	"default": {
 		Name: "default",
 		Sections: []string{
-			"Title", "Overview", "Features", "Tech Stack", "Installation", "Usage", "Scripts/Commands",
-			"Environment Variables", "Project Structure", "API or Architecture Notes",
+			"Title", "Overview", "Aim", "Problem", "Solution", "Features", "Tech Stack", "Installation", "Usage", "Scripts/Commands",
+			"Environment Variables", "Project Structure", "Flow Diagram", "API or Architecture Notes",
 			"Development Workflow", "Contributing", "License",
 		},
 		Tone:   "professional and practical",
-		Format: []string{"Use clean markdown headings", "Prefer concise examples and commands"},
+		Format: []string{"Use clean markdown headings", "Prefer concise examples and commands", "Use mermaid and SVG accents where relevant"},
 	},
 	"minimal": {
 		Name:     "minimal",
-		Sections: []string{"Title", "Overview", "Tech Stack", "Quick Start", "Usage", "License"},
+		Sections: []string{"Title", "Overview", "Aim", "Solution", "Tech Stack", "Quick Start", "Usage", "License"},
 		Tone:     "concise and direct",
 		Format:   []string{"Keep sections short", "Avoid long prose"},
 	},
 	"detailed": {
 		Name: "detailed",
 		Sections: []string{
-			"Title", "Overview", "Problem Statement", "Features", "Tech Stack", "Architecture",
+			"Title", "Overview", "Aim", "Problem Statement", "Solution", "Features", "Tech Stack", "Architecture",
 			"Installation", "Configuration", "Environment Variables", "Usage", "Scripts/Commands",
-			"Project Structure", "Testing", "Deployment", "Troubleshooting", "Contributing", "License",
+			"Project Structure", "Flow Diagram", "Architecture Diagram", "Testing", "Deployment", "Troubleshooting", "Contributing", "License",
 		},
 		Tone:      "deeply explanatory but developer-friendly",
-		Format:    []string{"Include command snippets", "Call out assumptions"},
+		Format:    []string{"Include command snippets", "Call out assumptions", "Favor diagram-supported explanations"},
 		SystemAdd: "When context is uncertain, mark assumptions clearly.",
 	},
 	"tervux": {
 		Name: "tervux",
 		Sections: []string{
-			"Title", "Overview", "Why This Project", "Feature Highlights", "Tech Stack",
+			"Title", "Overview", "Aim", "Problem", "Why This Project", "Solution", "Feature Highlights", "Tech Stack",
 			"Getting Started", "Usage", "Developer Commands", "Environment Variables",
-			"Architecture Notes", "Project Structure", "Contributing", "License",
+			"Flow Diagram", "Architecture Notes", "Project Structure", "Contributing", "License",
 		},
 		Tone:   "confident, modern, and practical under the Tervux brand",
-		Format: []string{"Use polished markdown and strong section flow", "Keep DX-first language"},
+		Format: []string{"Use polished markdown and strong section flow", "Keep DX-first language", "Use badges and SVG dividers"},
 	},
 }
 

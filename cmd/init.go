@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/spf13/cobra"
@@ -43,6 +42,13 @@ func newInitCmd() *cobra.Command {
 					},
 				},
 				{
+					Name: "developer_name",
+					Prompt: &survey.Input{
+						Message: "Developer name for README footer:",
+						Default: cfg.DeveloperName,
+					},
+				},
+				{
 					Name: "output",
 					Prompt: &survey.Input{
 						Message: "Output file path:",
@@ -63,11 +69,12 @@ func newInitCmd() *cobra.Command {
 				},
 			}
 			ans := struct {
-				Provider string
-				Template string
-				Output   string
-				Include  string
-				Exclude  string
+				Provider      string
+				Template      string
+				DeveloperName string `survey:"developer_name"`
+				Output        string
+				Include       string
+				Exclude       string
 			}{}
 			if err := survey.Ask(qs, &ans); err != nil {
 				return err
@@ -75,6 +82,7 @@ func newInitCmd() *cobra.Command {
 
 			cfg.Provider = ans.Provider
 			cfg.Template = ans.Template
+			cfg.DeveloperName = ans.DeveloperName
 			cfg.Output.File = ans.Output
 			cfg.Scan.Include = csv(ans.Include)
 			cfg.Scan.Exclude = append(cfg.Scan.Exclude, csv(ans.Exclude)...)
@@ -82,7 +90,14 @@ func newInitCmd() *cobra.Command {
 			if err := config.Save(path, cfg); err != nil {
 				return err
 			}
-			fmt.Fprintln(cmd.OutOrStdout(), cli.Success("Initialized %s", path))
+			cli.PrintTable(cmd.OutOrStdout(), "Initialization Complete", []string{"Field", "Value"}, [][]string{
+				{"Config File", path},
+				{"Provider", cfg.Provider},
+				{"Template", cfg.Template},
+				{"Developer", emptyFallback(cfg.DeveloperName, "not set")},
+				{"Output", cfg.Output.File},
+			})
+			printProviderAdvisory(cmd, cfg.Provider)
 			return nil
 		},
 	}
@@ -120,4 +135,11 @@ func trimSpace(s string) string {
 		return ""
 	}
 	return s[i : j+1]
+}
+
+func emptyFallback(v, fallback string) string {
+	if trimSpace(v) == "" {
+		return fallback
+	}
+	return trimSpace(v)
 }

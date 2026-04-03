@@ -1,10 +1,9 @@
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/spf13/cobra"
 
+	"tervdocs/internal/cli"
 	"tervdocs/internal/config"
 	"tervdocs/internal/providers"
 )
@@ -29,7 +28,11 @@ func newAuthCmd() *cobra.Command {
 			if err := p.Validate(); err != nil {
 				return err
 			}
-			fmt.Fprintln(cmd.OutOrStdout(), "auth configuration looks valid")
+			cli.PrintTable(cmd.OutOrStdout(), "Auth Test", []string{"Field", "Value"}, [][]string{
+				{"OK", "Authentication configuration looks valid"},
+				{"Provider", cfg.Provider},
+				{"Model", cfg.Model},
+			})
 			return nil
 		},
 	})

@@ -57,6 +57,7 @@ func (c *OpenAIClient) Generate(ctx context.Context, req Request) (Response, err
 			{Role: "user", Content: req.UserPrompt},
 		},
 		"temperature": req.Temperature,
+		"max_tokens":  req.MaxTokens,
 	}
 	buf, _ := json.Marshal(body)
 

@@ -47,7 +47,7 @@ func (c *ClaudeClient) Generate(ctx context.Context, req Request) (Response, err
 	}
 	body := map[string]any{
 		"model":      model,
-		"max_tokens": 1800,
+		"max_tokens": req.MaxTokens,
 		"system":     req.SystemPrompt,
 		"messages": []map[string]string{
 			{"role": "user", "content": req.UserPrompt},

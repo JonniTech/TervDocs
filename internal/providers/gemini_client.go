@@ -50,6 +50,10 @@ func (c *GeminiClient) Generate(ctx context.Context, req Request) (Response, err
 		"contents": []map[string]any{
 			{"parts": []map[string]string{{"text": req.SystemPrompt + "\n\n" + req.UserPrompt}}},
 		},
+		"generationConfig": map[string]any{
+			"maxOutputTokens": req.MaxTokens,
+			"temperature":     req.Temperature,
+		},
 	}
 	buf, _ := json.Marshal(body)
 

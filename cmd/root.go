@@ -29,15 +29,28 @@ var rootCmd = &cobra.Command{
 }
 
 func Execute() error {
-	return rootCmd.Execute()
+	if err := rootCmd.Execute(); err != nil {
+		printErr(err)
+		return err
+	}
+	return nil
 }
 
 func init() {
 	cobra.EnableCommandSorting = true
+	rootCmd.SilenceErrors = true
+	rootCmd.SilenceUsage = true
 	rootCmd.PersistentFlags().StringVar(&configPath, "config", "", "Path to .tervdocs.toml")
 	rootCmd.PersistentFlags().StringVar(&rootDir, "root", ".", "Project root directory")
 	rootCmd.SetOut(os.Stdout)
 	rootCmd.SetErr(os.Stderr)
+	rootCmd.SetHelpFunc(func(cmd *cobra.Command, args []string) {
+		fmt.Fprintln(cmd.OutOrStdout(), cli.Help(cmd, version))
+	})
+	rootCmd.SetUsageFunc(func(cmd *cobra.Command) error {
+		fmt.Fprintln(cmd.OutOrStdout(), cli.Help(cmd, version))
+		return nil
+	})
 	rootCmd.PersistentPreRun = func(cmd *cobra.Command, args []string) {
 		_ = container
 	}
@@ -55,5 +68,7 @@ func init() {
 }
 
 func printErr(err error) {
-	fmt.Fprintln(os.Stderr, cli.Error("%v", err))
+	cli.PrintTable(os.Stderr, "Error", []string{"State", "Detail"}, [][]string{
+		{"ERROR", err.Error()},
+	})
 }
