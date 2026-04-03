@@ -1,0 +1,35 @@
+provider = "free"
+model = "glm-4.7-flash"
+template = "tervux"
+temperature = 0.2
+timeout = 60
+
+[output]
+file = "README.md"
+backup = true
+
+[scan]
+include = ["cmd", "internal", "pkg", "src", "app"]
+exclude = ["node_modules", ".git", "dist", "build", "vendor", "coverage", ".next", ".turbo", "bin"]
+max_files = 200
+max_bytes_per_file = 50000
+
+[providers.free]
+api_key = ""
+model = "glm-4.7-flash"
+base_url = "https://api.z.ai/api/paas/v4"
+
+[providers.openai]
+api_key = ""
+model = "gpt-4o-mini"
+base_url = "https://api.openai.com/v1"
+
+[providers.gemini]
+api_key = ""
+model = "gemini-2.5-flash"
+base_url = "https://generativelanguage.googleapis.com/v1beta"
+
+[providers.claude]
+api_key = ""
+model = "claude-sonnet-4-0"
+base_url = "https://api.anthropic.com/v1"

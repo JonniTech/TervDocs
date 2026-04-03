@@ -1,0 +1,8 @@
+GUIDE.md
+tervdocs
+dist/
+coverage.out
+*.bak.*
+.idea
+.codex
+.qoder
